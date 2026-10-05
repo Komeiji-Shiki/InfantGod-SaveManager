@@ -29,7 +29,7 @@ namespace Graywill.InfantGodSaveManager
             if (!NativeAccess.Alive(menuList)) return;
             var quickLoad = NativeAccess.Field(os, "_workspaceQuickLoadButton") as GButton;
             if (NativeAccess.Alive(quickLoad)) SetCaption(quickLoad, "快速加载 (F9)");
-            if (menuList.GetChild(SaveButtonName) != null) return;
+            if (menuList.GetChild(SaveButtonName) != null) { NativeMenuEntries.Refresh(menuList); return; }
             var quickSave = NativeAccess.Field(os, "_workspaceQuickSaveButton") as GButton;
             if (!NativeAccess.Alive(quickSave) || string.IsNullOrEmpty(quickSave.resourceURL)) return;
             var normal = UIPackage.CreateObjectFromURL(quickSave.resourceURL)?.asButton;
@@ -45,17 +45,8 @@ namespace Graywill.InfantGodSaveManager
                 expand = parent?.parent?.GetController("ExpandMenu"); if (expand != null) expand.selectedIndex = 0;
                 SaveManagerHost.Instance?.OpenSavePage();
             });
-            float previousHeight = menuList.height;
-            var menu = menuList.parent;
-            float previousBottom = menu.y + menu.height;
-            menuList.AddChildAt(normal, Math.Min(4, menuList.numChildren));
-            menuList.ResizeToFit(menuList.numChildren);
-            float extra = menuList.height - previousHeight;
-            if (extra > 0)
-            {
-                // 以原菜单实测尺寸扩展，保持菜单底边位置；原有快存/快读索引保持不变。
-                menu.height += extra; menu.y = previousBottom - menu.height;
-            }
+            // 添加独立条目，原有退出对象保留；显示高度同时扩展列表、父容器及原生遮罩。
+            NativeMenuEntries.Change(menuList, () => menuList.AddChildAt(normal, Math.Min(4, menuList.numChildren)));
         }
         private static void SetCaption(GButton button, string text)
         {
