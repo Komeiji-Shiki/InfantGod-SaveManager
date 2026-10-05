@@ -18,11 +18,12 @@ namespace Graywill.InfantGodSaveManager
                 Item = item; X = item.x; Y = item.y; Width = item.width; Height = item.height;
                 ScaleX = item.scaleX; ScaleY = item.scaleY; Rotation = item.rotation; Alpha = item.alpha;
             }
-            internal void Restore()
+            internal void Restore(bool restorePosition = true)
             {
                 if (!NativeAccess.Alive(Item)) return;
                 Item.SetSize(Width, Height, true); Item.SetScale(ScaleX, ScaleY);
-                Item.SetXY(X, Y); Item.rotation = Rotation; Item.alpha = Alpha;
+                if (restorePosition) Item.SetXY(X, Y);
+                Item.rotation = Rotation; Item.alpha = Alpha;
             }
         }
         private sealed class Baseline { internal Geometry Root; internal readonly List<Geometry> Objects = new List<Geometry>(); }
@@ -55,9 +56,26 @@ namespace Graywill.InfantGodSaveManager
         internal static void AfterRestore(GComponent panel)
         {
             if (panel == null || !Defaults.TryGetValue(panel, out var baseline)) return;
+            // 父面板的位置属于当前角色列表，不复用池对象以前的槽位坐标。
             // 先恢复父面板尺寸，再恢复子组件，避免尺寸关系把子组件的基准位置重复偏移。
-            baseline.Root.Restore();
+            baseline.Root.Restore(false);
             foreach (var geometry in baseline.Objects) geometry.Restore();
+        }
+
+        internal static void PlaceHostFirst(NPCPanelManager manager)
+        {
+            var list = NativeAccess.Field(manager, "speakerList") as GList;
+            if (!NativeAccess.Alive(list)) return;
+            // 原生角色识别以 GetCurrentAistaltCharacter 为准，不从贴图或名称文本猜角色。
+            string host = NativeAccess.Call(manager, "GetCurrentAistaltCharacter") as string;
+            if (string.IsNullOrEmpty(host)) return;
+            var panel = manager.GetPanelForCharacter(host);
+            if (!NativeAccess.Alive(panel) || panel.parent != list) return;
+            var active = NativeAccess.Field(manager, "activeCharacters") as List<string>;
+            int activeIndex = active?.IndexOf(host) ?? -1;
+            if (activeIndex > 0) { active.RemoveAt(activeIndex); active.Insert(0, host); }
+            // 移动实际已绑定的主持人面板，NPC 相对顺序与各角色内容完整保留。
+            if (list.GetChildIndex(panel) > 0) list.SetChildIndex(panel, 0);
         }
     }
 
@@ -68,4 +86,10 @@ namespace Graywill.InfantGodSaveManager
     }
     [HarmonyPatch(typeof(NPCPanelManager), "RestorePanelDefaultState")]
     internal static class RestorePanelPatch { private static void Postfix(GComponent panel) => PanelRecovery.AfterRestore(panel); }
+
+    [HarmonyPatch(typeof(NPCPanelManager), "RefreshSpeakerLayout")]
+    internal static class RestoreSpeakerOrderPatch
+    {
+        private static void Prefix(NPCPanelManager __instance) => PanelRecovery.PlaceHostFirst(__instance);
+    }
 }
