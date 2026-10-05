@@ -75,6 +75,8 @@ namespace Graywill.InfantGodSaveManager
             return scenes != null && scenes.IsLoading;
         }
         internal static bool Ready(SaveSystem system) => system != null && (bool)NativeAccess.Field(system, "isInitialized");
+        internal static bool HasQuickSave(SaveSlot slot) => slot?.quickSave != null &&
+            !string.IsNullOrEmpty(slot.quickSave.rewindName) && RewindService.HasSnapshotGameState(slot.quickSave.rewindName);
 
         internal static List<SavePoint> Points(SaveSlot slot)
         {
@@ -82,29 +84,37 @@ namespace Graywill.InfantGodSaveManager
             if (slot == null) return points;
             foreach (var point in ManualPoints.List(slot.slotId))
                 points.Add(new SavePoint { Day = point.day, Manual = point, Title = point.title, Detail = $"{point.hour:00}:{point.minute:00}  ·  " + LocalTime(point.savedAtUtc) });
-            if (slot.quickSave != null && !string.IsNullOrEmpty(slot.quickSave.rewindName) && RewindService.HasSnapshotGameState(slot.quickSave.rewindName))
+            if (HasQuickSave(slot))
                 points.Add(new SavePoint { Day = slot.quickSave.gameDay, Quick = true, Title = "即时存档", Detail = LocalTime(slot.quickSave.savedAtUtc) + (slot.quickSave.hasPosition ? "  ·  已保存对话位置" : "  ·  对话外状态") });
+            var automatic = new List<SavePoint>();
             slot.EnsureMidDaySaveEntries();
             if (slot.midDaySaveEntries != null)
-                foreach (var entry in slot.midDaySaveEntries.OrderByDescending(e => e.gameDay).ThenByDescending(e => e.sequence))
-                    if (entry.saveData != null) points.Add(FromData(entry.saveData, true, entry.sequence));
+                foreach (var entry in slot.midDaySaveEntries)
+                    if (entry.saveData != null) automatic.Add(FromData(entry.saveData, true, entry.sequence));
             if (slot.dailySaves != null)
-                foreach (var entry in slot.dailySaves.OrderByDescending(e => e.Key))
-                    if (entry.Value != null) points.Add(FromData(entry.Value, false, -1));
+                foreach (var entry in slot.dailySaves)
+                    if (entry.Value != null) automatic.Add(FromData(entry.Value, false, -1));
+            // 每日与连线记录组成同一时间线，缺失游戏时刻的旧记录排在同日已知时刻之后。
+            points.AddRange(automatic.OrderByDescending(point => point.Day).ThenByDescending(point => point.GameMinutes).ThenByDescending(point => point.Sequence));
             return points;
         }
-        private static SavePoint FromData(SaveData data, bool midDay, int sequence) => new SavePoint
+        private static SavePoint FromData(SaveData data, bool midDay, int sequence)
         {
-            Day = data.gameDay, MidDay = midDay, Sequence = sequence,
-            Title = midDay ? (data.saveReason == "手动存档" ? "手动记录" : "连线前记录") : "每日记录",
-            Detail = (data.hasTimeData ? $"{data.gameHour:00}:{data.gameMinute:00}  ·  " : "") + LocalTime(data.saveTime)
-        };
+            string kind = midDay ? (data.saveReason == "手动存档" ? "手动记录" : "连线前记录") : "每日记录";
+            return new SavePoint
+            {
+                Day = data.gameDay, MidDay = midDay, Sequence = sequence,
+                GameMinutes = data.hasTimeData ? data.gameHour * 60 + data.gameMinute : -1,
+                Title = BranchContext.TryTitle(data.jumpToNode, out var title) ? title : kind,
+                Detail = kind + "  ·  " + (data.hasTimeData ? $"{data.gameHour:00}:{data.gameMinute:00}  ·  " : "") + LocalTime(data.saveTime)
+            };
+        }
         internal static string LocalTime(string value) => DateTime.TryParse(value, out var date) ? date.ToLocalTime().ToString("yyyy-MM-dd HH:mm") : (value ?? "");
     }
 
     internal sealed class SavePoint
     {
-        internal int Day, Sequence = -1;
+        internal int Day, GameMinutes = -1, Sequence = -1;
         internal bool Quick, MidDay;
         internal string Title, Detail;
         internal ManualPoint Manual;

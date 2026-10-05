@@ -59,16 +59,21 @@ namespace Graywill.InfantGodSaveManager
         internal static string Title(string node)
         {
             if (string.IsNullOrEmpty(node)) return "对话外 · 当前游戏状态";
+            return TryTitle(node, out var title) ? title : "当前剧情片段";
+        }
+        internal static bool TryTitle(string node, out string title)
+        {
+            title = null;
+            if (string.IsNullOrEmpty(node)) return false;
             if (labels == null)
             {
                 var path = Path.Combine(Plugin.DataDirectory, "scene-labels.json");
                 try { labels = File.Exists(path) ? JObject.Parse(File.ReadAllText(path))["nodes"]?.ToObject<Dictionary<string, string>>() ?? new Dictionary<string, string>() : new Dictionary<string, string>(); }
                 catch (Exception exception) { labels = new Dictionary<string, string>(); Plugin.Log.LogWarning("剧情标题映射未加载：" + exception.Message); }
             }
-            if (labels.TryGetValue(node, out var label)) return label;
+            if (labels.TryGetValue(node, out title)) return true;
             int suffix = node.IndexOf(".Auto_", StringComparison.Ordinal);
-            if (suffix > 0 && labels.TryGetValue(node.Substring(0, suffix), out label)) return label;
-            return "当前剧情片段";
+            return suffix > 0 && labels.TryGetValue(node.Substring(0, suffix), out title);
         }
         private void Unbind()
         {

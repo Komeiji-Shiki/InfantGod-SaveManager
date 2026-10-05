@@ -257,7 +257,7 @@ namespace Graywill.InfantGodSaveManager
         {
             var slot = slots[index];
             manualCounts.TryGetValue(slot.slotId, out int count);
-            string subtitle = count + " 个手动点" + (slot.currentDay > 0 ? $"  ·  Day {slot.currentDay}" : "") + (slot.quickSave != null ? "  ·  有快存" : "");
+            string subtitle = count + " 个手动点" + (slot.currentDay > 0 ? $"  ·  Day {slot.currentDay}" : "") + (SlotStore.HasQuickSave(slot) ? "  ·  有快存" : "");
             RenderRow(value, index, slotsList.width - 22, $"{index + 1:00}   {DisplayName(slot)}" + (slot.isActive ? "  ●" : ""), subtitle, index == selectedSlot);
         }
         private void RenderPoint(int index, GObject value)
