@@ -188,6 +188,7 @@ namespace Graywill.InfantGodSaveManager
             slotsList.selectedIndex = selectedSlot;
             pointsList.selectedIndex = selectedPoint;
             slotsList.RefreshVirtualList(); pointsList.RefreshVirtualList();
+            RepaintSlotSelection();
             nameInput.text = DisplayName(slots[selectedSlot]);
             UpdateSelection(); UpdateActions();
         }
@@ -277,6 +278,12 @@ namespace Graywill.InfantGodSaveManager
             // 原生列表先改变选择，立即同步可见卡片，避免虚拟列表延后刷新留下旧底色。
             foreach (var child in pointsList.GetChildren())
                 if (child.data is int index && index >= 0 && index < points.Count) RenderPoint(index, child);
+        }
+        private void RepaintSlotSelection()
+        {
+            // 切换游玩线时同步旧、新可见槽的底色，不等待虚拟列表下一次刷新。
+            foreach (var child in slotsList.GetChildren())
+                if (child.data is int index && index >= 0 && index < slots.Length) RenderSlot(index, child);
         }
         private void RenderCard(GObject value, int index, float width, SavePoint point, bool selected)
         {
@@ -382,7 +389,7 @@ namespace Graywill.InfantGodSaveManager
         }
         private static GTextField Label(string text, int size, Color color)
         {
-            var label = new GTextField { text = text, touchable = false, singleLine = true };
+            var label = new GTextField { autoSize = AutoSizeType.None, text = text, touchable = false, singleLine = true };
             var format = label.textFormat; format.font = UIConfig.defaultFont; format.size = Mathf.RoundToInt(size * 1.8f * Unit); format.color = color; label.textFormat = format;
             return label;
         }
