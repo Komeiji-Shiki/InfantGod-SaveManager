@@ -202,8 +202,9 @@ namespace Graywill.InfantGodSaveManager
         {
             if (!NativeAccess.Alive(save)) return;
             save.enabled = host.InGame && !host.Working;
-            load.enabled = points.Count > 0 && !host.Working;
-            delete.enabled = !showNative && points.Count > 0 && !host.Working;
+            bool hasSelection = selectedPoint >= 0 && selectedPoint < points.Count;
+            load.enabled = hasSelection && !host.Working;
+            delete.enabled = !showNative && hasSelection && !host.Working;
             add.enabled = rename.enabled = !host.Working;
         }
         internal void Status(string message) { if (NativeAccess.Alive(status)) status.text = message; }
@@ -223,14 +224,12 @@ namespace Graywill.InfantGodSaveManager
         }
         private void Load()
         {
-            selectedPoint = pointsList.selectedIndex;
             if (selectedPoint < 0 || selectedPoint >= points.Count) return;
             if (host.InGame && !Confirm("load", "读取后将离开当前未保存的进度。再次点击“读取此点”确认。")) return;
             var point = points[selectedPoint]; ResetConfirmation(); host.Load(selectedSlot, point);
         }
         private void Delete()
         {
-            selectedPoint = pointsList.selectedIndex;
             if (selectedPoint < 0 || selectedPoint >= points.Count || points[selectedPoint].Manual == null) return;
             if (!Confirm("delete", "只删除所选手动点及其缩略图。再次点击“删除此点”确认。")) return;
             Run(() => { ManualPoints.Delete(points[selectedPoint].Manual); ResetConfirmation(); Refresh(); Status("所选手动点已删除，后续分支保留原来源标记。"); });
@@ -270,7 +269,8 @@ namespace Graywill.InfantGodSaveManager
             var point = points[index];
             int columns = Math.Max(1, pointsList.columnCount);
             float width = (pointsList.width - 32 * Unit - (columns - 1) * 24 * Unit) / columns;
-            RenderCard(value, index, width, point, index == pointsList.selectedIndex);
+            // 虚拟列表重绘期间 selectedIndex 可暂时变为 -1，业务选档始终使用已确认的索引。
+            RenderCard(value, index, width, point, index == selectedPoint);
         }
         private void RepaintPointSelection()
         {
