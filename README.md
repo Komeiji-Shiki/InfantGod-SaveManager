@@ -25,6 +25,8 @@
 
 ## 安装
 
+从 [GitHub 发行版](https://github.com/Komeiji-Shiki/InfantGod-SaveManager/releases/latest) 下载 `InfantGod-SaveManager-v1.0.2.zip`。安装包包含插件、BepInEx 加载器、`Install-Mod.ps1` 安装脚本及 `Uninstall-Mod.ps1` 卸载脚本，当前采用 PowerShell 脚本安装。
+
 关闭游戏，将发布 ZIP 解压到任意目录。在解压目录打开 PowerShell，执行：
 
 ```powershell
