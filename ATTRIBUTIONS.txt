@@ -1,0 +1,12 @@
+幼神 / Infant God
+原作者：colsalley
+原作来源：https://store.steampowered.com/app/4238140/
+游戏派生场景标签：CC BY-NC-SA 4.0
+许可：https://creativecommons.org/licenses/by-nc-sa/4.0/
+
+InfantGod Save Manager / 幼神多存档管理
+实现：Komeiji-Shiki / Graywill
+剧情标签整理源：InfantGod-Archive / 幼神资料终端
+仅发布无歧义的已探索节点标签，不含完整剧情脚本。
+
+加载器及其他第三方许可参见 THIRD-PARTY-NOTICES.md 和 LICENSES 目录。

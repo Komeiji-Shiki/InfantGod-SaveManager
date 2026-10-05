@@ -1,0 +1,5 @@
+src/plugin/bin/
+src/plugin/obj/
+src/plugin/deps/
+dist/
+*.user

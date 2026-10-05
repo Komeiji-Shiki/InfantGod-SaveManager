@@ -1,0 +1,18 @@
+InfantGod Save Manager / 幼神多存档管理
+
+1. 本项目原创的软件代码（src、tools、安装脚本与构建脚本）采用 MIT License。
+   完整条款见 LICENSES/MIT.txt。
+
+2. data/scene-labels.json 为据《幼神》授权剧情与已探索标题整理的派生资料，
+   采用 Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International。
+   原作：Infant God / 幼神；作者：colsalley。
+   标签整理：InfantGod-Archive / 幼神资料终端。
+   来源：https://store.steampowered.com/app/4238140/
+   许可：https://creativecommons.org/licenses/by-nc-sa/4.0/
+   完整条款见 LICENSES/CC-BY-NC-SA-4.0.txt。
+
+3. BepInEx、Doorstop、Harmony、MonoMod、Mono.Cecil 等第三方组件保留原许可。
+   详见 THIRD-PARTY-NOTICES.md。游戏程序集不随本项目发布。
+
+4. 本 Mod 在玩家本机生成的游戏缩略图源自玩家当时运行的《幼神》画面，
+   原作角色、美术与文本的权利及署名仍归原作者，发布包不包含玩家存档或截图。
