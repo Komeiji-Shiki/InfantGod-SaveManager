@@ -28,14 +28,17 @@ namespace Graywill.InfantGodSaveManager
         {
             private readonly GList list;
             private readonly GComponent menu;
-            private readonly float bottomOffset, nativeMenuHeight, nativeListHeight;
+            private readonly float nativeMenuHeight, nativeListHeight;
+            private readonly Controller expandController;
+            private readonly GObject startButton;
             private readonly List<Backdrop> backdrops = new List<Backdrop>();
             private bool applying;
 
             internal MenuLayout(GList value)
             {
                 list = value; menu = list.parent;
-                bottomOffset = (menu.parent?.height ?? 0) - menu.y - menu.height;
+                expandController = menu.parent?.GetController("ExpandMenu") ?? menu.GetController("ExpandMenu");
+                startButton = menu.parent?.GetChild("Start");
                 nativeMenuHeight = AuthoredHeight(menu);
                 nativeListHeight = AuthoredHeight(list);
                 foreach (var child in menu.GetChildren())
@@ -60,6 +63,13 @@ namespace Graywill.InfantGodSaveManager
             internal void Refresh()
             {
                 if (applying || !NativeAccess.Alive(list) || !NativeAccess.Alive(menu)) return;
+                if (expandController == null) return;
+                // 原生关闭态依靠控制器把菜单移出画面，不能把该位置作为展开后的底边锚点。
+                // 显式关闭显示与命中，保证增加的条目也不会覆盖开始按钮。
+                bool expanded = expandController.selectedIndex != 0;
+                menu.visible = expanded;
+                menu.touchable = expanded;
+                if (!expanded || !NativeAccess.Alive(startButton)) return;
                 applying = true;
                 try
                 {
@@ -72,13 +82,14 @@ namespace Graywill.InfantGodSaveManager
                     float contentHeight = list.height;
                     float growth = Mathf.Max(0, contentHeight - nativeListHeight);
                     float targetHeight = nativeMenuHeight + growth;
-                    float bottom = (menu.parent?.height ?? 0) - bottomOffset;
                     // 使用相对原生尺寸的总增量，多个独立 Mod 反复刷新也不会累计撑高。
                     menu.height = targetHeight;
                     foreach (var backdrop in backdrops)
                         if (NativeAccess.Alive(backdrop.Item)) backdrop.Item.height = backdrop.Height + growth;
                     list.height = contentHeight;
-                    menu.y = bottom - menu.height;
+                    // 菜单只在展开态重定位，以开始按钮的实际顶边为底边；不缓存任何关闭态坐标。
+                    float startTop = menu.parent.GlobalToLocal(startButton.LocalToGlobal(Vector2.zero)).y;
+                    menu.yMin = startTop - menu.height;
                     list.EnsureBoundsCorrect();
                 }
                 finally { applying = false; }
