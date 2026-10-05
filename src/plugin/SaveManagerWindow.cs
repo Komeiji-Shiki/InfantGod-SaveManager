@@ -104,7 +104,8 @@ namespace Graywill.InfantGodSaveManager
             {
                 var row = context.data as GObject;
                 if (!(row?.data is int id)) return;
-                selectedPoint = id; ResetConfirmation(); UpdateSelection(); pointsList.RefreshVirtualList();
+                selectedPoint = id; pointsList.selectedIndex = id;
+                ResetConfirmation(); UpdateSelection(); RepaintPointSelection();
             });
             nameInput = Input("游玩线名称"); pane.AddChild(nameInput);
             pointName = Input("存档点名称（可选，留空使用当前剧情标题）"); pane.AddChild(pointName);
@@ -184,6 +185,8 @@ namespace Graywill.InfantGodSaveManager
             foreach (var slot in slots) manualCounts[slot.slotId] = ManualPoints.List(slot.slotId).Count;
             selectedPoint = points.Count == 0 ? -1 : Mathf.Clamp(selectedPoint, 0, points.Count - 1);
             slotsList.numItems = slots.Length; pointsList.numItems = points.Count;
+            slotsList.selectedIndex = selectedSlot;
+            pointsList.selectedIndex = selectedPoint;
             slotsList.RefreshVirtualList(); pointsList.RefreshVirtualList();
             nameInput.text = DisplayName(slots[selectedSlot]);
             UpdateSelection(); UpdateActions();
@@ -220,12 +223,14 @@ namespace Graywill.InfantGodSaveManager
         }
         private void Load()
         {
+            selectedPoint = pointsList.selectedIndex;
             if (selectedPoint < 0 || selectedPoint >= points.Count) return;
             if (host.InGame && !Confirm("load", "读取后将离开当前未保存的进度。再次点击“读取此点”确认。")) return;
             var point = points[selectedPoint]; ResetConfirmation(); host.Load(selectedSlot, point);
         }
         private void Delete()
         {
+            selectedPoint = pointsList.selectedIndex;
             if (selectedPoint < 0 || selectedPoint >= points.Count || points[selectedPoint].Manual == null) return;
             if (!Confirm("delete", "只删除所选手动点及其缩略图。再次点击“删除此点”确认。")) return;
             Run(() => { ManualPoints.Delete(points[selectedPoint].Manual); ResetConfirmation(); Refresh(); Status("所选手动点已删除，后续分支保留原来源标记。"); });
@@ -265,13 +270,24 @@ namespace Graywill.InfantGodSaveManager
             var point = points[index];
             int columns = Math.Max(1, pointsList.columnCount);
             float width = (pointsList.width - 32 * Unit - (columns - 1) * 24 * Unit) / columns;
-            RenderCard(value, index, width, point, index == selectedPoint);
+            RenderCard(value, index, width, point, index == pointsList.selectedIndex);
+        }
+        private void RepaintPointSelection()
+        {
+            // 原生列表先改变选择，立即同步可见卡片，避免虚拟列表延后刷新留下旧底色。
+            foreach (var child in pointsList.GetChildren())
+                if (child.data is int index && index >= 0 && index < points.Count) RenderPoint(index, child);
         }
         private void RenderCard(GObject value, int index, float width, SavePoint point, bool selected)
         {
             float u = Unit;
             var row = value.asCom; row.data = index;
-            if (value is GButton nativeButton) nativeButton.title = point.Title;
+            if (value is GButton nativeButton)
+            {
+                nativeButton.title = point.Title;
+                nativeButton.changeStateOnClick = false;
+                nativeButton.selected = selected;
+            }
             foreach (var child in row.GetChildren()) child.visible = false;
             var fill = row.GetChild(Prefix + "CardFill") as GGraph;
             if (fill == null) { fill = new GGraph { name = Prefix + "CardFill", touchable = false }; row.AddChildAt(fill, 0); }
@@ -343,7 +359,12 @@ namespace Graywill.InfantGodSaveManager
         {
             float u = Unit;
             var row = value.asCom; row.data = index;
-            if (value is GButton nativeButton) nativeButton.title = title;
+            if (value is GButton nativeButton)
+            {
+                nativeButton.title = title;
+                nativeButton.changeStateOnClick = false;
+                nativeButton.selected = selected;
+            }
             foreach (var child in row.GetChildren()) child.visible = false;
             var fill = row.GetChild(Prefix + "Fill") as GGraph;
             if (fill == null) { fill = new GGraph { name = Prefix + "Fill", touchable = false }; row.AddChildAt(fill, 0); }
