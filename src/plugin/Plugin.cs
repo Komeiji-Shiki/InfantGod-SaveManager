@@ -7,7 +7,7 @@ using UnityEngine.SceneManagement;
 
 namespace Graywill.InfantGodSaveManager
 {
-    [BepInPlugin("graywill.infantgod.savemanager", "幼神·多存档管理", "1.0.1")]
+    [BepInPlugin("graywill.infantgod.savemanager", "幼神·多存档管理", "1.0.2")]
     [BepInProcess("Aistalt.exe")]
     public sealed class Plugin : BaseUnityPlugin
     {
@@ -22,7 +22,7 @@ namespace Graywill.InfantGodSaveManager
             SceneManager.sceneLoaded += SceneLoaded;
             Application.quitting += Quit;
             if (Time.frameCount > 0 && SceneManager.GetActiveScene().isLoaded) EnsureHost();
-            Logger.LogInfo("多存档管理 1.0.1 已注册：主菜单载入页 / 开始菜单普通保存 / 原生快速加载。");
+            Logger.LogInfo("多存档管理 1.0.2 已注册：主菜单载入页 / 开始菜单存档/读取 / 原生快速加载。");
         }
         private static void SceneLoaded(Scene scene, LoadSceneMode mode) => EnsureHost();
         private static void EnsureHost()

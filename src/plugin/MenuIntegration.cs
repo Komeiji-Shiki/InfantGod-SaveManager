@@ -35,7 +35,7 @@ namespace Graywill.InfantGodSaveManager
             var normal = UIPackage.CreateObjectFromURL(quickSave.resourceURL)?.asButton;
             if (normal == null) return;
             normal.name = SaveButtonName;
-            SetCaption(normal, "普通保存");
+            SetCaption(normal, "存档/读取");
             normal.onClick.Clear();
             normal.onClick.Add(context =>
             {

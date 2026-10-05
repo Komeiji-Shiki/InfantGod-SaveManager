@@ -53,7 +53,7 @@ namespace Graywill.InfantGodSaveManager
             UpdateMode();
             selectedPoint = 0; ResetConfirmation();
             window.Show(); Layout(); Refresh();
-            heading.text = saving ? "普通保存" : "载入游戏";
+            heading.text = saving ? "存档/读取" : "载入游戏";
             Status(host.InGame ? "每个手动点独立保存。快速加载 (F9) 读取当前游玩线最近一次普通保存或快速保存。" : "选择游玩线与存档卡片，继续当时的剧情。Esc 返回主菜单。");
         }
         internal void Close()

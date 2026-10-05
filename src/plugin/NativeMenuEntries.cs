@@ -67,11 +67,21 @@ namespace Graywill.InfantGodSaveManager
                 BindController(menu.GetController("ExpandMenu"));
                 BindController(menu.GetController("Status"));
                 BindController(menu.parent?.GetController("ExpandMenu"));
+                list.onClickItem.Add(Collapse);
             }
 
             private void BindController(Controller controller)
             {
                 if (controller != null) controller.onChanged.Add(Refresh);
+            }
+
+            private void Collapse()
+            {
+                // 原生菜单项只执行各自的动作，需同步关闭展开控制器及整个扩展菜单。
+                if (expandController != null) expandController.selectedIndex = 0;
+                if (!NativeAccess.Alive(menu)) return;
+                menu.visible = false;
+                menu.touchable = false;
             }
 
             internal void Refresh()

@@ -30,7 +30,7 @@ if ($taskExisting) {
     foreach ($taskRecord in $taskExisting.files) { $taskRecords.Add($taskRecord); $taskRecorded.Add([string]$taskRecord.path) | Out-Null }
 }
 New-Item -ItemType Directory -Path $taskBackup -Force | Out-Null
-$taskState = [ordered]@{ status='Installing'; version='1.0.1'; backupRoot=$taskBackup; files=$taskRecords }
+$taskState = [ordered]@{ status='Installing'; version='1.0.2'; backupRoot=$taskBackup; files=$taskRecords }
 $taskSourceRoot = Join-Path $PSScriptRoot $taskPlugin
 foreach ($taskFile in Get-ChildItem -LiteralPath $taskSourceRoot -File -Recurse) {
     $taskRelative = $taskPlugin + '\' + $taskFile.FullName.Substring($taskSourceRoot.Length + 1)
@@ -49,5 +49,5 @@ foreach ($taskFile in Get-ChildItem -LiteralPath $taskSourceRoot -File -Recurse)
     Copy-Item -LiteralPath $taskFile.FullName -Destination $taskTarget -Force
 }
 $taskState.status = 'Installed'; $taskState | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath $taskStatePath -Encoding utf8
-Write-Output '幼神多存档管理已安装。主菜单“载入游戏”或游戏内开始菜单“普通保存”打开新版页面。'
+Write-Output '幼神多存档管理已安装。主菜单“载入游戏”或游戏内开始菜单“存档/读取”打开新版页面。'
 Write-Output '原快速保存保留；“快速加载(F9)”读取当前槽最近一次普通保存或快速保存。'

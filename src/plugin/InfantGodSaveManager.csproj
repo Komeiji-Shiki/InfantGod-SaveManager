@@ -4,7 +4,7 @@
     <LangVersion>latest</LangVersion>
     <AssemblyName>Graywill.InfantGodSaveManager</AssemblyName>
     <RootNamespace>Graywill.InfantGodSaveManager</RootNamespace>
-    <Version>1.0.1</Version>
+    <Version>1.0.2</Version>
     <GameManagedPath Condition="'$(GameManagedPath)' == ''">$(GamePath)\Aistalt_Data\Managed</GameManagedPath>
     <RestorePackagesPath>$(MSBuildThisFileDirectory)deps\nuget</RestorePackagesPath>
     <RestoreSources>$(MSBuildThisFileDirectory)deps\feed</RestoreSources>
