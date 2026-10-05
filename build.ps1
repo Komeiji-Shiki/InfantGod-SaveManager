@@ -1,6 +1,6 @@
 param([Parameter(Mandatory = $true)][string]$GamePath, [string]$OutputPath, [switch]$SkipBuild)
 $ErrorActionPreference = 'Stop'
-$taskVersion = '1.0.0'
+$taskVersion = '1.0.1'
 $taskManaged = Join-Path $GamePath 'Aistalt_Data\Managed'
 if (-not (Test-Path -LiteralPath (Join-Path $taskManaged 'InfantGod.dll'))) { throw 'GamePath 应指向 Aistalt.exe 所在目录。' }
 if (-not $OutputPath) { $OutputPath = Join-Path $PSScriptRoot "dist\InfantGod-SaveManager-v$taskVersion" }

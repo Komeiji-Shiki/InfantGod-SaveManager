@@ -299,6 +299,7 @@ namespace Graywill.InfantGodSaveManager
             var fill = row.GetChild(Prefix + "CardFill") as GGraph;
             if (fill == null) { fill = new GGraph { name = Prefix + "CardFill", touchable = false }; row.AddChildAt(fill, 0); }
             fill.visible = true; fill.DrawRect(width, 350 * u, Mathf.RoundToInt(2 * u), selected ? Orange : Quiet, selected ? Ink : new Color32(218, 216, 175, 255));
+            DynamicThemeColors.Update(fill, selected ? Ink : new Color32(218, 216, 175, 255));
             var title = CardLabel(row, "CardTitle", 17, selected ? Paper : Ink);
             var detail = CardLabel(row, "CardDetail", 13, selected ? Paper : Quiet);
             var branch = CardLabel(row, "CardBranch", 14, selected ? Paper : Ink);
@@ -339,7 +340,9 @@ namespace Graywill.InfantGodSaveManager
         {
             var label = row.GetChild(Prefix + name) as GTextField;
             if (label == null) { label = Label("", size, color); label.name = Prefix + name; row.AddChild(label); }
-            label.visible = true; var format = label.textFormat; format.color = color; format.size = Mathf.RoundToInt(size * 1.8f * Unit); label.textFormat = format; return label;
+            label.visible = true; var format = label.textFormat; format.color = color; format.size = Mathf.RoundToInt(size * 1.8f * Unit); label.textFormat = format;
+            DynamicThemeColors.Update(label, color);
+            return label;
         }
         private void BindThumbnail(GLoader loader, ManualPoint point)
         {
@@ -376,6 +379,7 @@ namespace Graywill.InfantGodSaveManager
             var fill = row.GetChild(Prefix + "Fill") as GGraph;
             if (fill == null) { fill = new GGraph { name = Prefix + "Fill", touchable = false }; row.AddChildAt(fill, 0); }
             fill.visible = true; fill.DrawRect(width, 122 * u, Mathf.RoundToInt(2 * u), selected ? Orange : Quiet, selected ? Ink : new Color32(218, 216, 175, 255));
+            DynamicThemeColors.Update(fill, selected ? Ink : new Color32(218, 216, 175, 255));
             var first = row.GetChild(Prefix + "Title") as GTextField;
             if (first == null) { first = Label("", 17, Ink); first.name = Prefix + "Title"; row.AddChild(first); }
             var second = row.GetChild(Prefix + "Detail") as GTextField;
@@ -384,6 +388,8 @@ namespace Graywill.InfantGodSaveManager
             first.text = title; second.text = detail;
             var format = first.textFormat; format.color = selected ? Paper : Ink; first.textFormat = format;
             format = second.textFormat; format.color = selected ? new Color32(195, 199, 159, 255) : Quiet; second.textFormat = format;
+            DynamicThemeColors.Update(first, selected ? Paper : Ink);
+            DynamicThemeColors.Update(second, selected ? new Color32(195, 199, 159, 255) : Quiet);
             Put(first, 20 * u, 16 * u, width - 40 * u, 44 * u); Put(second, 20 * u, 72 * u, width - 40 * u, 38 * u);
             row.SetSize(width, 122 * u);
         }
