@@ -124,7 +124,7 @@ namespace Graywill.InfantGodSaveManager
         private static bool Prefix(GObject obj, ref string __result)
         {
             // 新增的普通保存按钮复用原生外观，行为由本 Mod 绑定，不继承模板的命令元数据。
-            if (obj?.name == MenuIntegration.SaveButtonName) { __result = ""; return false; }
+            if (obj?.name == MenuIntegration.SaveButtonName || obj?.name == NativeButtons.Name) { __result = ""; return false; }
             if (!(obj is GComponent) || obj.packageItem != null) return true;
             for (var current = obj; current != null; current = current.parent)
                 if (current.name?.StartsWith(SaveManagerWindow.Prefix, StringComparison.Ordinal) == true) { __result = ""; return false; }

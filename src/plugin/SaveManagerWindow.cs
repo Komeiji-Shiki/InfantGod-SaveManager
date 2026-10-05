@@ -234,7 +234,7 @@ namespace Graywill.InfantGodSaveManager
         private void UpdateMode()
         {
             pointCaption.text = showNative ? "快速存档 / 原生自动记录" : "独立手动存档点";
-            mode.GetChild("label").text = showNative ? "切换：手动存档点" : "切换：快存 / 自动";
+            mode.title = showNative ? "切换：手动存档点" : "切换：快存 / 自动";
         }
         private bool Confirm(string action, string text)
         {
@@ -374,18 +374,12 @@ namespace Graywill.InfantGodSaveManager
         }
         private static GButton Button(string text, Action clicked)
         {
-            var button = new GButton { name = Prefix + "Button", opaque = true };
-            var fill = new GGraph { name = "fill", touchable = false }; button.AddChild(fill);
-            var label = Label(text, 15, Paper); label.name = "label"; label.align = AlignType.Center; label.verticalAlign = VertAlignType.Middle; button.AddChild(label);
-            button.onClick.Add(context => { context.StopPropagation(); clicked(); });
-            button.onRollOver.Add(() => fill.DrawRect(button.width, button.height, 1, Orange, Orange));
-            button.onRollOut.Add(() => fill.DrawRect(button.width, button.height, 1, Ink, Ink));
-            return button;
+            return NativeButtons.Create(text, Mathf.RoundToInt(27 * Unit), clicked);
         }
         private static void Put(GObject value, float x, float y, float width, float height) { value.SetXY(x, y); value.SetSize(width, height); }
         private static void PlaceButton(GButton button, float x, float y, float width, float height)
         {
-            Put(button, x, y, width, height); button.GetChild("fill").asGraph.DrawRect(width, height, 1, Ink, Ink); button.GetChild("label").SetSize(width, height);
+            NativeButtons.Place(button, x, y, width, height);
         }
         public void Dispose()
         {
