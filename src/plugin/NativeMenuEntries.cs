@@ -31,6 +31,7 @@ namespace Graywill.InfantGodSaveManager
             private readonly float nativeMenuHeight, nativeListHeight;
             private readonly Controller expandController;
             private readonly GObject startButton;
+            private readonly GObject clippingMask;
             private readonly List<Backdrop> backdrops = new List<Backdrop>();
             private bool applying;
 
@@ -44,10 +45,23 @@ namespace Graywill.InfantGodSaveManager
                 foreach (var child in menu.GetChildren())
                 {
                     if (child == list) continue;
+                    if (child.displayObject == menu.mask)
+                    {
+                        clippingMask = child;
+                        // 此图的 initHeight 为 0，sourceHeight=54 是纹理尺寸，不能用于菜单布局。
+                        // 遮罩跟随实际列表，解除会重新写回原始裁切高度的 XY/尺寸控制器。
+                        foreach (int gearIndex in new[] { 1, 2 })
+                        {
+                            var gear = child.GetGear(gearIndex); gear.Dispose(); gear.controller = null;
+                        }
+                        child.relations.ClearAll();
+                        child.AddRelation(list, RelationType.Left_Left);
+                        child.AddRelation(list, RelationType.Top_Top);
+                        child.AddRelation(list, RelationType.Size);
+                        continue;
+                    }
                     float height = AuthoredHeight(child);
-                    // 原菜单的显示遮罩与大面积背景都要随内容扩展，不能只扩大透明的父容器。
-                    if (child.displayObject == menu.mask || child.name == "Mask" ||
-                        (height >= nativeListHeight && child.width >= list.width))
+                    if (height >= nativeListHeight && child.width >= list.width)
                         backdrops.Add(new Backdrop { Item = child, Height = height });
                 }
                 BindController(menu.GetController("ExpandMenu"));
@@ -87,6 +101,13 @@ namespace Graywill.InfantGodSaveManager
                     foreach (var backdrop in backdrops)
                         if (NativeAccess.Alive(backdrop.Item)) backdrop.Item.height = backdrop.Height + growth;
                     list.height = contentHeight;
+                    if (NativeAccess.Alive(clippingMask))
+                    {
+                        clippingMask.SetXY(list.x, list.y);
+                        clippingMask.SetSize(list.width, contentHeight);
+                    }
+                    // 原生列表的展开位移动画仍可运行，但菜单底边以外不参与显示和点击。
+                    menu.rootContainer.clipRect = new Rect(0, 0, menu.width, menu.height);
                     // 菜单只在展开态重定位，以开始按钮的实际顶边为底边；不缓存任何关闭态坐标。
                     float startTop = menu.parent.GlobalToLocal(startButton.LocalToGlobal(Vector2.zero)).y;
                     menu.yMin = startTop - menu.height;
