@@ -6,6 +6,8 @@
 
 1.0.2 将游戏内入口和页面标题统一为“存档/读取”，并在点击开始菜单项目后完整收起扩展菜单。
 
+1.0.3 修复 Windows 自带 PowerShell 5.1 安装时的中文乱码和语法错误。安装、卸载、公共函数及构建脚本统一使用 UTF-8 BOM；本次仅更新安装包，游戏插件沿用 1.0.2，已经安装成功并正常使用的玩家无需更新。
+
 适用版本：Windows x64、Unity 2022.3.46f1 Mono、BepInEx 5.4.23.5。插件安装后直接生效：**主菜单“载入游戏”进入新版载入页；游戏内开始菜单的“存档/读取”打开保存与读取页面。** 原有快速保存保留，原“加载”改名为“快速加载”。
 
 ## 存档如何组织
@@ -25,15 +27,17 @@
 
 ## 安装
 
-从 [GitHub 发行版](https://github.com/Komeiji-Shiki/InfantGod-SaveManager/releases/latest) 下载 `InfantGod-SaveManager-v1.0.2.zip`。安装包包含插件、BepInEx 加载器、`Install-Mod.ps1` 安装脚本及 `Uninstall-Mod.ps1` 卸载脚本，当前采用 PowerShell 脚本安装。
+从 [GitHub 发行版](https://github.com/Komeiji-Shiki/InfantGod-SaveManager/releases/latest) 下载 `InfantGod-SaveManager-v1.0.3.zip`。安装包包含插件、BepInEx 加载器、`Install-Mod.ps1` 安装脚本及 `Uninstall-Mod.ps1` 卸载脚本，当前采用 PowerShell 脚本安装。名称含 `source` 的 ZIP 和 GitHub 的 `Source code` 是源码，需要自行构建后才能安装。
 
 关闭游戏，将发布 ZIP 解压到任意目录。在解压目录打开 PowerShell，执行：
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\Install-Mod.ps1 -GamePath 'B:\Steam\steamapps\common\幼神 Demo\Build'
+powershell -NoProfile -ExecutionPolicy Bypass -File .\Install-Mod.ps1 -GamePath 'B:\Steam\steamapps\common\幼神 Demo\Build'
 ```
 
 路径应当指向 `Aistalt.exe` 所在的 `Build` 目录。安装器会安装独立插件目录 `BepInEx\plugins\InfantGodSaveManager`；缺少 BepInEx 5 时安装随包附带的加载器。已有本 Mod 文件先备份，已有共用加载器保留。
+
+如果旧安装包报出中文乱码、缺少引号或“意外的标记”，请重新下载 1.0.3 或更新的完整安装包，解压到新目录后执行上述命令。旧版多个 `.ps1` 文件均缺少 UTF-8 BOM，只修改一个文件或切换终端字符显示编码不能完整修复。
 
 这个插件管理实际存档数组，因此不提供运行中热停用开关。更新或卸载后重新启动游戏。
 
@@ -42,7 +46,7 @@ powershell -ExecutionPolicy Bypass -File .\Install-Mod.ps1 -GamePath 'B:\Steam\s
 关闭游戏后，从同一个安装包执行：
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\Uninstall-Mod.ps1 -GamePath 'B:\Steam\steamapps\common\幼神 Demo\Build'
+powershell -NoProfile -ExecutionPolicy Bypass -File .\Uninstall-Mod.ps1 -GamePath 'B:\Steam\steamapps\common\幼神 Demo\Build'
 ```
 
 **当前游玩线若是第四槽或之后的新增槽，先在游戏中读取原始前三槽中的一个，再正常退出并卸载。** 原版只有三个槽，卸载脚本会检查当前槽位，并在发现新增槽位仍处于使用状态时停止；不会擅自搬移玩家进度或改选另一个槽。使用自定义存档目录时，额外传入 `-SaveDataPath '实际的SaveData目录'`。
@@ -87,6 +91,8 @@ powershell -ExecutionPolicy Bypass -File .\Uninstall-Mod.ps1 -GamePath 'B:\Steam
 ```
 
 首次构建缺少 BepInEx 编译依赖时，`src/plugin/bootstrap.py` 从 BepInEx 官方发布准备固定版本加载器。输出安装目录和 ZIP 到 `dist`。输出目录已有内容时请传入新的 `-OutputPath`，以免把旧文件或玩家数据混入新包。
+
+修改 `.ps1` 后请保留 UTF-8 BOM，仓库的 `.editorconfig` 已约定该编码。构建会原样复制安装脚本，兼容 Windows PowerShell 5.1 和 PowerShell 7。
 
 `data/scene-labels.json` 已随源码提交，正常构建不依赖资料终端项目。可选工具 `tools/build_scene_labels.py` 用于从资料终端重新整理无歧义的已探索标题。
 

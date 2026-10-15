@@ -1,4 +1,4 @@
-param(
+﻿param(
     [Parameter(Mandatory = $true)][string]$GamePath,
     [string]$SaveDataPath = (Join-Path ([Environment]::GetFolderPath('UserProfile')) 'AppData\LocalLow\Colsalley\Aistalt\SaveData')
 )

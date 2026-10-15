@@ -1,4 +1,4 @@
-param([Parameter(Mandatory = $true)][string]$GamePath)
+﻿param([Parameter(Mandatory = $true)][string]$GamePath)
 $ErrorActionPreference = 'Stop'
 . (Join-Path $PSScriptRoot 'Installer-Common.ps1')
 $taskGameRoot = Get-SaveManagerGameRoot $GamePath
@@ -30,7 +30,7 @@ if ($taskExisting) {
     foreach ($taskRecord in $taskExisting.files) { $taskRecords.Add($taskRecord); $taskRecorded.Add([string]$taskRecord.path) | Out-Null }
 }
 New-Item -ItemType Directory -Path $taskBackup -Force | Out-Null
-$taskState = [ordered]@{ status='Installing'; version='1.0.2'; backupRoot=$taskBackup; files=$taskRecords }
+$taskState = [ordered]@{ status='Installing'; version='1.0.3'; backupRoot=$taskBackup; files=$taskRecords }
 $taskSourceRoot = Join-Path $PSScriptRoot $taskPlugin
 foreach ($taskFile in Get-ChildItem -LiteralPath $taskSourceRoot -File -Recurse) {
     $taskRelative = $taskPlugin + '\' + $taskFile.FullName.Substring($taskSourceRoot.Length + 1)
